@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import './App.css'
 
 function App() {
   const [newTodo, setNewTodo] = useState('')
