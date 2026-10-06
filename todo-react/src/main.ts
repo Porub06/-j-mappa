@@ -1,60 +1,112 @@
 import './style.css'
-import heroImg from './assets/hero.png'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
+import axios from 'axios'
 import { setupCounter } from './counter.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+  <section id="center">
 
-<div class="ticks"></div>
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+    <div class="todo-container">
 
-<div class="ticks"></div>
-<section id="spacer"></section>
+      <h1>TodoHazifeladat</h1>
+
+      <div class="server-container">
+        <label id="server-status">
+          Server állapot: ellenőrzés...
+        </label>
+      </div>
+
+      <div class="todo-input-container">
+        <input
+          id="todo-input"
+          type="text"
+          placeholder="Új feladat..."
+        >
+
+        <button id="add-button" type="button">
+          Add
+        </button>
+      </div>
+
+      <ul id="todo-list"></ul>
+
+    </div>
+
+    <button
+      id="counter"
+      type="button"
+      class="counter"
+    ></button>
+
+  </section>
 `
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+setupCounter(
+  document.querySelector<HTMLButtonElement>('#counter')!
+)
+
+async function checkServer() {
+  const statusLabel =
+    document.querySelector<HTMLLabelElement>('#server-status')!
+
+  try {
+    await axios.get('/')
+
+    statusLabel.textContent = 'Server állapot: server online'
+    statusLabel.style.color = 'green'
+  } catch {
+    statusLabel.textContent = 'Server állapot: server offline'
+    statusLabel.style.color = 'red'
+  }
+}
+
+checkServer()
+
+const todoInput =
+  document.querySelector<HTMLInputElement>('#todo-input')!
+
+const addButton =
+  document.querySelector<HTMLButtonElement>('#add-button')!
+
+const todoList =
+  document.querySelector<HTMLUListElement>('#todo-list')!
+
+function addTodo() {
+  const text = todoInput.value.trim()
+
+  if (text === '') {
+    return
+  }
+
+  const listItem = document.createElement('li')
+
+  listItem.className = 'todo-item'
+
+  const textElement = document.createElement('span')
+  textElement.textContent = text
+
+  const deleteButton = document.createElement('button')
+  deleteButton.type = 'button'
+  deleteButton.className = 'delete-button'
+  deleteButton.textContent = 'Törlés'
+
+  deleteButton.addEventListener('click', () => {
+    listItem.remove()
+  })
+
+  listItem.appendChild(textElement)
+  listItem.appendChild(deleteButton)
+
+  todoList.appendChild(listItem)
+
+  todoInput.value = ''
+  todoInput.focus()
+}
+
+addButton.addEventListener('click', addTodo)
+
+todoInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    addTodo()
+  }
+})
